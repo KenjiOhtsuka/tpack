@@ -112,9 +112,9 @@ tpack -u archive.txt -d restored -c config.yaml
 ## 📁 Output Format Example
 
 ```
-==------==
+===========
 == a.txt ==
-==------==
+===========
 hello
 world
 ```
