@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tpack"
+version = "0.1.0"
+description = "A lightweight text-based archiver for packing directories into a single file and unpacking them."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+    { name = "Kenji Otsuka" }
+]
+
+dependencies = [
+    "click>=8.0",
+    "pyyaml>=6.0"
+]
+
+[project.scripts]
+tpack = "tpack.cli:cli"
+
+[tool.setuptools]
+packages = ["tpack"]
+
+[tool.setuptools.package-data]
+tpack = ["*.yaml"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
