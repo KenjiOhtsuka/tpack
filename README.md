@@ -139,6 +139,7 @@ pytest -q
 tpack/
   tpack/
     __init__.py
+    __main__.py
     cli.py
     packer.py
     unpacker.py
