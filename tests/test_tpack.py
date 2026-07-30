@@ -195,3 +195,66 @@ def test_pack_no_source_raises(tmp_path):
     import pytest
     with pytest.raises(ValueError, match="exist"):
         pack([tmp_path / "nonexistent"], packed, config)
+
+
+def test_unpack_rejects_parent_dir_traversal(tmp_path):
+    dest = tmp_path / "dest"
+    archive = tmp_path / "archive.txt"
+    archive.write_text(
+        "===============\n"
+        "== ../outside.txt ==\n"
+        "===============\n"
+        "malicious\n"
+    )
+    config = {"encoding": "utf-8"}
+
+    import pytest
+    with pytest.raises(ValueError, match="outside"):
+        unpack(archive, dest, config)
+    assert not (tmp_path / "outside.txt").exists()
+
+
+def test_unpack_rejects_deep_parent_traversal(tmp_path):
+    dest = tmp_path / "a" / "b" / "c"
+    archive = tmp_path / "archive.txt"
+    archive.write_text(
+        "=========================\n"
+        "== ../../../../outside.txt ==\n"
+        "=========================\n"
+        "gotcha\n"
+    )
+    config = {"encoding": "utf-8"}
+
+    import pytest
+    with pytest.raises(ValueError, match="outside"):
+        unpack(archive, dest, config)
+
+
+def test_unpack_rejects_absolute_path(tmp_path):
+    dest = tmp_path / "dest"
+    archive = tmp_path / "archive.txt"
+    archive.write_text(
+        "===================\n"
+        "== /tmp/evil.txt ==\n"
+        "===================\n"
+        "evil\n"
+    )
+    config = {"encoding": "utf-8"}
+
+    import pytest
+    with pytest.raises(ValueError, match="outside"):
+        unpack(archive, dest, config)
+
+
+def test_unpack_allows_normal_subdir_path(tmp_path):
+    dest = tmp_path / "dest"
+    archive = tmp_path / "archive.txt"
+    archive.write_text(
+        "===================\n"
+        "== normal/file.txt ==\n"
+        "===================\n"
+        "content\n"
+    )
+    config = {"encoding": "utf-8"}
+    unpack(archive, dest, config)
+    assert (dest / "normal" / "file.txt").read_text() == "content\n"
