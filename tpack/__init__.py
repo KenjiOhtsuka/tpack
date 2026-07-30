@@ -2,16 +2,17 @@
 tpack
 ========
 
-A lightweight text-based archiver for packing directories into a single file
-and unpacking them in another environment.
+A lightweight text-based archiver for packing directories and files into a
+single text archive and unpacking them.
 
 This package provides:
-- pack: pack a directory into a text archive
+- pack: pack directories/files into a text archive
 - unpack: unpack a text archive into a directory
 
 CLI usage:
-    $ tpack <source_dir> -o output.txt
-    $ tpack -u output.txt -d extracted_dir
+    $ tpack -d <dir> -o output.txt          # pack a directory
+    $ tpack -f <file> ... -o output.txt     # pack specific files
+    $ tpack archive.txt -u -o extracted_dir # unpack
 """
 
 from .packer import pack
@@ -22,4 +23,4 @@ __all__ = [
     "unpack",
 ]
 
-__version__ = "0.1.0"
+__version__ = "2.0.0"

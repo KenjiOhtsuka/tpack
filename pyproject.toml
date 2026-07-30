@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tpack"
-version = "0.1.0"
+version = "2.0.0"
 description = "A lightweight text-based archiver for packing directories into a single file and unpacking them."
 readme = "README.md"
 requires-python = ">=3.8"

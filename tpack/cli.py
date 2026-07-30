@@ -1,9 +1,6 @@
-"""
-CLI interface for tpack: pack directories or unpack archives.
-"""
-
 from pathlib import Path
 import argparse
+import sys
 
 from .packer import pack
 from .unpacker import unpack as unpack_archive
@@ -12,12 +9,37 @@ from .config import load_config
 
 def cli():
     parser = argparse.ArgumentParser(
-        description="tpack: pack directories into a text archive or unpack them."
+        description="tpack: pack directories/files into a text archive or unpack them."
     )
 
     parser.add_argument(
-        "path",
-        help="Source directory (pack) or archive file (unpack)."
+        "archive",
+        nargs="?",
+        default=None,
+        metavar="ARCHIVE",
+        help="Archive file (required in unpack mode)."
+    )
+
+    parser.add_argument(
+        "-d", "--dir",
+        action="append",
+        default=[],
+        dest="dirs",
+        help="Source directory to pack (can be specified multiple times)."
+    )
+
+    parser.add_argument(
+        "-f", "--files",
+        action="append",
+        default=[],
+        dest="files",
+        help="Specific file to pack (can be specified multiple times)."
+    )
+
+    parser.add_argument(
+        "-o", "--output",
+        default=None,
+        help="Output archive file (pack) or destination directory (unpack)."
     )
 
     parser.add_argument(
@@ -27,36 +49,52 @@ def cli():
     )
 
     parser.add_argument(
-        "-o", "--output",
-        default=None,
-        help="Output file path for packing."
-    )
-
-    parser.add_argument(
-        "-d", "--dest",
-        default=None,
-        help="Destination directory for unpacking."
-    )
-
-    parser.add_argument(
         "-c", "--config",
         default=None,
         help="Path to config YAML file."
     )
 
-    args = parser.parse_args()
+    parser.add_argument(
+        "--follow-symlinks",
+        action="store_true",
+        help="Follow symlinks that resolve outside the source directory."
+    )
 
+    args = parser.parse_args()
     cfg = load_config(args.config)
 
     if args.unpack:
-        if args.dest is None:
-            parser.error("Unpack mode requires --dest option.")
-        unpack_archive(Path(args.path), Path(args.dest), cfg)
-        print(f"Unpacked into: {args.dest}")
-    else:
+        if args.archive is None:
+            parser.error("unpack mode requires an archive file as argument.")
         if args.output is None:
-            parser.error("Pack mode requires --output option.")
-        pack(Path(args.path), Path(args.output), cfg)
+            parser.error("unpack mode requires --output (-o) destination directory.")
+        if args.dirs:
+            parser.error("unpack mode does not accept --dir (-d).")
+        if args.files:
+            parser.error("unpack mode does not accept --files (-f).")
+
+        unpack_archive(Path(args.archive), Path(args.output), cfg)
+        print(f"Unpacked into: {args.output}")
+    else:
+        if args.archive is not None:
+            parser.error(
+                "unexpected argument. To pack a directory, use -d <dir>. "
+                "To unpack, use -u ARCHIVE -o DEST."
+            )
+        if args.output is None:
+            parser.error("pack mode requires --output (-o) option.")
+        if not args.dirs and not args.files:
+            parser.error(
+                "specify at least one source via --dir (-d) or --files (-f)."
+            )
+
+        pack(
+            dirs=[Path(d) for d in args.dirs],
+            files=[Path(f) for f in args.files],
+            output_path=Path(args.output),
+            config=cfg,
+            follow_symlinks=args.follow_symlinks,
+        )
         print(f"Packed into: {args.output}")
 
 
