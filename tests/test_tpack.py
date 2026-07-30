@@ -258,3 +258,31 @@ def test_unpack_allows_normal_subdir_path(tmp_path):
     config = {"encoding": "utf-8"}
     unpack(archive, dest, config)
     assert (dest / "normal" / "file.txt").read_text() == "content\n"
+
+
+def test_unpack_rejects_symlink_escape(tmp_path):
+    import pytest
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    dest = tmp_path / "dest"
+    dest.mkdir()
+    link = dest / "link"
+
+    try:
+        link.symlink_to(outside, target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("cannot create symlinks on this system")
+
+    archive = tmp_path / "archive.txt"
+    archive.write_text(
+        "====================\n"
+        "== link/evil.txt ==\n"
+        "====================\n"
+        "evil\n"
+    )
+    config = {"encoding": "utf-8"}
+
+    import pytest
+    with pytest.raises(ValueError, match="outside"):
+        unpack(archive, dest, config)
+    assert not (outside / "evil.txt").exists()
