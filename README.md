@@ -164,7 +164,7 @@ hello
 world
 ```
 
-The header format is controlled by `prefix` and `border_char`. The first line of the archive records the header configuration used when packing, so the archive can be unpacked correctly even without supplying the matching config.
+The header format is controlled by `prefix` and `border_char`. The first line of the archive records the header configuration used when packing, so the archive can be unpacked correctly even without supplying the matching config. If `prefix` or `border_char` contains whitespace, the metadata line is omitted and unpacking requires the matching config.
 
 ---
 

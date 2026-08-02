@@ -37,7 +37,9 @@ def _is_border(line, prefix, border_char):
     if not (line.startswith(prefix) and line.endswith(prefix)):
         return False
     inner = line[len(prefix) : -len(prefix)]
-    return bool(inner) and all(ch == border_char for ch in inner)
+    if not inner or len(inner) % len(border_char) != 0:
+        return False
+    return inner == border_char * (len(inner) // len(border_char))
 
 
 def _check_path_within_dest(target_resolved, dest_resolved):

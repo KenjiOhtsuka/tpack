@@ -166,7 +166,11 @@ def pack(dirs, output_path, config, files=None, follow_symlinks=False):
     )
 
     with open(output_path, "w", encoding=encoding, newline="\n") as out:
-        if " " not in prefix and " " not in border_char:
+        if (
+            prefix
+            and border_char
+            and not any(char.isspace() for char in f"{prefix}{border_char}")
+        ):
             out.write(metadata)
         for resolved_path, archive_path in entries:
             try:
