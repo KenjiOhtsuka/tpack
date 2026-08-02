@@ -160,7 +160,18 @@ def pack(dirs, output_path, config, files=None, follow_symlinks=False):
 
     entries.sort(key=lambda e: e[1])
 
+    metadata = (
+        f"# tpack-archive header.prefix: {prefix} "
+        f"header.border_char: {border_char}\n"
+    )
+
     with open(output_path, "w", encoding=encoding, newline="\n") as out:
+        if (
+            prefix
+            and border_char
+            and not any(char.isspace() for char in f"{prefix}{border_char}")
+        ):
+            out.write(metadata)
         for resolved_path, archive_path in entries:
             try:
                 text = resolved_path.read_text(encoding=encoding)

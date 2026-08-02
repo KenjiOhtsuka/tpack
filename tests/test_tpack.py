@@ -137,6 +137,112 @@ def test_header_format(tmp_path):
     assert "## src/x.txt ##" in text
 
 
+def test_roundtrip_custom_header_without_config(tmp_path):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "a.txt").write_text("hello\nworld\n")
+
+    pack_config = {
+        "exclude": [],
+        "remove_blank_lines": False,
+        "encoding": "utf-8",
+        "header": {"prefix": "##", "border_char": "-"},
+    }
+
+    packed = tmp_path / "archive.txt"
+    restored = tmp_path / "restored"
+
+    pack([src], packed, pack_config)
+    unpack(packed, restored, {"encoding": "utf-8"})
+
+    assert (restored / "src" / "a.txt").read_text() == "hello\nworld\n"
+
+
+def test_roundtrip_custom_header_with_config(tmp_path):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "a.txt").write_text("hello\nworld\n")
+
+    config = {
+        "exclude": [],
+        "remove_blank_lines": False,
+        "encoding": "utf-8",
+        "header": {"prefix": "##", "border_char": "-"},
+    }
+
+    packed = tmp_path / "archive.txt"
+    restored = tmp_path / "restored"
+
+    pack([src], packed, config)
+    unpack(packed, restored, config)
+
+    assert (restored / "src" / "a.txt").read_text() == "hello\nworld\n"
+
+
+def test_unpack_legacy_custom_header_via_config(tmp_path):
+    dest = tmp_path / "dest"
+    archive = tmp_path / "archive.txt"
+    archive.write_text(
+        "##-----------##\n"
+        "## notes.txt ##\n"
+        "##-----------##\n"
+        "legacy\n"
+    )
+    config = {
+        "encoding": "utf-8",
+        "header": {"prefix": "##", "border_char": "-"},
+    }
+
+    unpack(archive, dest, config)
+
+    assert (dest / "notes.txt").read_text() == "legacy\n"
+
+
+def test_roundtrip_multichar_border_char(tmp_path):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "a.txt").write_text("hello\nworld\n")
+
+    pack_config = {
+        "exclude": [],
+        "remove_blank_lines": False,
+        "encoding": "utf-8",
+        "header": {"prefix": "==", "border_char": "--"},
+    }
+
+    packed = tmp_path / "archive.txt"
+    restored = tmp_path / "restored"
+
+    pack([src], packed, pack_config)
+    unpack(packed, restored, {"encoding": "utf-8"})
+
+    assert (restored / "src" / "a.txt").read_text() == "hello\nworld\n"
+
+
+def test_metadata_omitted_for_whitespace_prefix(tmp_path):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "a.txt").write_text("hello\n")
+
+    config = {
+        "exclude": [],
+        "remove_blank_lines": False,
+        "encoding": "utf-8",
+        "header": {"prefix": "\t==", "border_char": "="},
+    }
+
+    packed = tmp_path / "archive.txt"
+    restored = tmp_path / "restored"
+
+    pack([src], packed, config)
+
+    assert not packed.read_text(encoding="utf-8").startswith("# tpack-archive")
+
+    unpack(packed, restored, config)
+
+    assert (restored / "src" / "a.txt").read_text() == "hello\n"
+
+
 def test_pack_multiple_dirs(tmp_path):
     src1 = tmp_path / "lib"
     src1.mkdir()
