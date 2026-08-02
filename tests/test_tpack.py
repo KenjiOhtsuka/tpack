@@ -282,6 +282,28 @@ def test_roundtrip_byte_fidelity(tmp_path):
     assert (restored / "src" / "a.txt").read_bytes() == b"line1\nline2\n"
 
 
+def test_unpack_overwrites_existing_files(tmp_path):
+    dest = tmp_path / "dest"
+    target = dest / "normal" / "file.txt"
+    target.parent.mkdir(parents=True)
+    target.write_bytes(b"old\n")
+
+    archive = tmp_path / "archive.txt"
+    archive.write_text(
+        "===================\n"
+        "== normal/file.txt ==\n"
+        "===================\n"
+        "content\n",
+        newline="\n",
+    )
+    config = {"encoding": "utf-8"}
+
+    unpack(archive, dest, config)
+    unpack(archive, dest, config)
+
+    assert (dest / "normal" / "file.txt").read_bytes() == b"content\n"
+
+
 def test_unpack_rejects_symlink_escape(tmp_path):
     import pytest
     outside = tmp_path / "outside"

@@ -1,11 +1,11 @@
 # tpack
 
 tpack is a lightweight text-based archiver that packs a directory into a single text file and restores it in another environment.  
-Unlike binary formats such as ZIP or TAR, tpack produces a fully readable UTF‑8 text archive that preserves file boundaries using configurable headers.  
-The archive can be inspected, diffed, pasted into documentation, or even provided to AI tools as plain text, while still allowing complete reconstruction of the original directory structure when needed.
+Unlike binary formats such as ZIP or TAR, tpack produces a fully readable text archive that preserves file boundaries using configurable headers.  
+The archive can be inspected, diffed, pasted into documentation, or even provided to AI tools as plain text, while still allowing reconstruction of the original directory structure when needed. Note: empty files are restored as a single newline rather than zero bytes.
 
 - Cross‑platform (Windows / macOS / Linux)
-  - Output is always UTF‑8 with LF (`\n`) newlines
+  - Output uses the configured encoding (default UTF‑8) with LF (`\n`) newlines
   - Configurable exclude rules, header format, and whitespace handling
   - Designed as a simple and portable CLI tool installable via pip
 
@@ -22,7 +22,7 @@ The archive can be inspected, diffed, pasted into documentation, or even provide
   - Custom encoding (default: UTF‑8)
 - Binary files are automatically skipped
 - Deterministic output format suitable for version control or diff tools
-- Archives are fully readable as plain text: you can inspect the entire directory structure without unpacking, paste it into documentation or chat tools, and even provide it directly to AI systems. When needed, the same archive can be unpacked to fully reconstruct the original directory structure.
+- Archives are fully readable as plain text: you can inspect the entire directory structure without unpacking, paste it into documentation or chat tools, and even provide it directly to AI systems. When needed, the same archive can be unpacked to reconstruct the original directory structure (empty files are restored as a single newline).
 
 ---
 
@@ -138,7 +138,7 @@ header:
   Controls how file boundaries are displayed in the text archive.  
   For example, the above config produces:
 
-  ```
+  ```text
   ===========
   == a.txt ==
   ===========
@@ -155,7 +155,7 @@ tpack archive.txt -u -o restored -c config.yaml
 
 ## 📁 Output Format Example
 
-```
+```text
 ===========
 == a.txt ==
 ===========
