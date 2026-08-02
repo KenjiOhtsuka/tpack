@@ -73,7 +73,11 @@ def cli():
         if args.files:
             parser.error("unpack mode does not accept --files (-f).")
 
-        unpack_archive(Path(args.archive), Path(args.output), cfg)
+        try:
+            unpack_archive(Path(args.archive), Path(args.output), cfg)
+        except ValueError as e:
+            print(f"error: {e}", file=sys.stderr)
+            sys.exit(1)
         print(f"Unpacked into: {args.output}")
     else:
         if args.archive is not None:
@@ -88,13 +92,17 @@ def cli():
                 "specify at least one source via --dir (-d) or --files (-f)."
             )
 
-        pack(
-            dirs=[Path(d) for d in args.dirs],
-            files=[Path(f) for f in args.files],
-            output_path=Path(args.output),
-            config=cfg,
-            follow_symlinks=args.follow_symlinks,
-        )
+        try:
+            pack(
+                dirs=[Path(d) for d in args.dirs],
+                files=[Path(f) for f in args.files],
+                output_path=Path(args.output),
+                config=cfg,
+                follow_symlinks=args.follow_symlinks,
+            )
+        except ValueError as e:
+            print(f"error: {e}", file=sys.stderr)
+            sys.exit(1)
         print(f"Packed into: {args.output}")
 
 

@@ -31,6 +31,7 @@ def unpack(input_file, dest_dir, config):
     dest_resolved = dest_dir.resolve()
 
     current_path = None
+    initialized_paths = set()
 
     with open(input_file, "r", encoding=encoding) as f:
         for raw_line in f:
@@ -49,9 +50,12 @@ def unpack(input_file, dest_dir, config):
                 _check_path_within_dest(target.resolve(), dest_resolved)
 
                 current_path = target
+                initialized_paths.discard(current_path)
                 current_path.parent.mkdir(parents=True, exist_ok=True)
                 continue
 
             if current_path:
-                with open(current_path, "a", encoding=encoding) as out:
+                mode = "a" if current_path in initialized_paths else "w"
+                initialized_paths.add(current_path)
+                with open(current_path, mode, encoding=encoding, newline="\n") as out:
                     out.write(raw_line)
