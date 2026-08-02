@@ -260,6 +260,28 @@ def test_unpack_allows_normal_subdir_path(tmp_path):
     assert (dest / "normal" / "file.txt").read_text() == "content\n"
 
 
+def test_roundtrip_byte_fidelity(tmp_path):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "a.txt").write_bytes(b"line1\nline2\n")
+
+    config = {
+        "exclude": [],
+        "remove_blank_lines": False,
+        "encoding": "utf-8",
+        "header": {"prefix": "==", "border_char": "="},
+    }
+
+    packed = tmp_path / "archive.txt"
+    restored = tmp_path / "restored"
+
+    pack([src], packed, config)
+    unpack(packed, restored, config)
+
+    assert b"\r\n" not in packed.read_bytes()
+    assert (restored / "src" / "a.txt").read_bytes() == b"line1\nline2\n"
+
+
 def test_unpack_rejects_symlink_escape(tmp_path):
     import pytest
     outside = tmp_path / "outside"

@@ -160,13 +160,17 @@ def pack(dirs, output_path, config, files=None, follow_symlinks=False):
 
     entries.sort(key=lambda e: e[1])
 
-    with open(output_path, "w", encoding=encoding) as out:
+    with open(output_path, "w", encoding=encoding, newline="\n") as out:
         for resolved_path, archive_path in entries:
-            out.write(_make_header(archive_path.as_posix(), prefix, border_char))
             try:
                 text = resolved_path.read_text(encoding=encoding)
             except UnicodeDecodeError:
+                print(
+                    f"error: cannot decode as {encoding}, skipping: {resolved_path}",
+                    file=sys.stderr,
+                )
                 continue
+            out.write(_make_header(archive_path.as_posix(), prefix, border_char))
             if remove_blank_lines:
                 text = "\n".join(
                     line for line in text.splitlines() if line.strip()

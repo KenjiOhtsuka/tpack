@@ -53,5 +53,5 @@ def unpack(input_file, dest_dir, config):
                 continue
 
             if current_path:
-                with open(current_path, "a", encoding=encoding) as out:
+                with open(current_path, "a", encoding=encoding, newline="\n") as out:
                     out.write(raw_line)
